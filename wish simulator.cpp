@@ -10,13 +10,15 @@
 #include <random>
 
 // todo
-// remove characters on rateup from character pool
+// split weapon and character chances for 4* and 5*
+// fix weapon banner pity rates
+// add epitomized path for weapon and chronicle
 // save inventory
 // add the rest of banner options lol
 
 using namespace std;
 
-string bannerType = "character";
+string bannerType = "weapon";
 string characterBannerVersion = "arlecchino-1";
 vector<string> characterRateupBanner = {"Arlecchino (5-Star)", "Freminet (4-Star)", "Lynette (4-Star)", "Xiangling (4-Star)"};
 string weaponBannerKeyword = "Crimson Moon's Semblance - The First Great Magic";
@@ -26,17 +28,17 @@ vector<string> threeStarWeaponPool = {"Black Tassel (3-Star)", "Bloodstained Gre
 "Debate Club (3-Star)", "Emerald Orb (3-Star)", "Ferrous Shadow (3-Star)", "Harbinger of Dawn (3-Star)", "Magic Guide (3-Star)", 
 "Raven Bow (3-Star)", "Sharpshooter's Oath (3-Star)", "Skyrider Sword (3-Star)", "Slingshot (3-Star)", "Thrilling Tales of Dragon Slayers (3-Star)"};
 
-vector<string> fourStarPool = {"Barbara (4-Star)", "Beidou (4-Star)", "Bennett (4-Star)", "Chongyun (4-Star)", "Fischl (4-Star)", 
+vector<string> fourStarCharacterPool = {"Barbara (4-Star)", "Beidou (4-Star)", "Bennett (4-Star)", "Chongyun (4-Star)", "Fischl (4-Star)", 
 "Ningguang (4-Star)", "Noelle (4-Star)", "Razor (4-Star)", "Sucrose (4-Star)", "Xiangling (4-Star)", "Xingqiu (4-Star)", "Diona (4-Star)", 
 "Xinyan (4-Star)", "Rosaria (4-Star)", "Yanfei (4-Star)", "Sayu (4-Star)", "Kujou Sara (4-Star)", "Thoma (4-Star)", "Gorou (4-Star)", 
 "Yun Jin (4-Star)", "Kuki Shinobu (4-Star)", "Shikanoin Heizou (4-Star)", "Collei (4-Star)", "Dori (4-Star)", "Candace (4-Star)", 
 "Layla (4-Star)", "Faruzan (4-Star)", "Yaoyao (4-Star)", "Mika (4-Star)", "Kaveh (4-Star)", "Kirara (4-Star)", "Freminet (4-Star)", 
-"Lynette (4-Star)", "Charlotte (4-Star)", "Chevreuse (4-Star)", "Gaming (4-Star)",
+"Lynette (4-Star)", "Charlotte (4-Star)", "Chevreuse (4-Star)", "Gaming (4-Star)"};
 
-"Dragon's Bane (4-Star)", "Eye of Perception (4-Star)", "Favonius Codex (4-Star)", "Favonius Greatsword (4-Star)", "Favonius Lance (4-Star)", 
-"Favonius Sword (4-Star)", "Favonius Warbow (4-Star)", "Lion's Roar (4-Star)", "Rainslasher (4-Star)", "Rust (4-Star)", 
-"Sacrificial Bow (4-Star)", "Sacrificial Fragments (4-Star)", "Sacrificial Greatsword (4-Star)", "Sacrificial Sword (4-Star)", 
-"The Bell (4-Star)", "The Flute (4-Star)", "The Stringless (4-Star)", "The Widsith (4-Star)"};
+vector<string> fourStarWeaponPool = {"Dragon's Bane (4-Star)", "Eye of Perception (4-Star)", "Favonius Codex (4-Star)", 
+"Favonius Greatsword (4-Star)", "Favonius Lance (4-Star)", "Favonius Sword (4-Star)", "Favonius Warbow (4-Star)", "Lion's Roar (4-Star)", 
+"Rainslasher (4-Star)", "Rust (4-Star)", "Sacrificial Bow (4-Star)", "Sacrificial Fragments (4-Star)", "Sacrificial Greatsword (4-Star)", 
+"Sacrificial Sword (4-Star)", "The Bell (4-Star)", "The Flute (4-Star)", "The Stringless (4-Star)", "The Widsith (4-Star)"};
 
 vector<string> fiveStarCharacterPool = {"Diluc (5-Star)", "Jean (5-Star)", "Keqing (5-Star)", "Mona (5-Star)", "Qiqi (5-Star)", 
 "Tighnari (5-Star)", "Dehya (5-Star)"};
@@ -260,32 +262,69 @@ void wishRandomizeLoss(int rarity){
 		case 3:
 			rnd = rand() % threeStarWeaponPool.size();
 			
-			cout << "+ + +       You got " << threeStarWeaponPool[rnd] << "!\n";
+			cout << "(   + + +   )   You got " << threeStarWeaponPool[rnd] << "!\n";
 			break;
 		case 4:
-			availablePool = fourStarPool;
+			odds = rand() % 100;
 			
-			for(int i = 1; i < characterRateupBanner.size(); i++){
-				for(int j = 0; j < availablePool.size(); j++){
-					if(availablePool[j] == characterRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
+			if(odds < 50){
+				availablePool = fourStarCharacterPool;
+				
+				if(bannerType == "character"){
+					for(int i = 1; i < characterRateupBanner.size(); i++){
+						for(int j = 0; j < availablePool.size(); j++){
+							if(availablePool[j] == characterRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
+						}
+					}
+				} else if(bannerType == "weapon"){
+					for(int i = 2; i < weaponRateupBanner.size(); i++){
+						for(int j = 0; j < availablePool.size(); j++){
+							if(availablePool[j] == weaponRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
+						}
+					}
+				}
+			} else {
+				availablePool = fourStarWeaponPool;
+				
+				if(bannerType == "character"){
+					for(int i = 1; i < characterRateupBanner.size(); i++){
+						for(int j = 0; j < availablePool.size(); j++){
+							if(availablePool[j] == characterRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
+						}
+					}
+				} else if(bannerType == "weapon"){
+					for(int i = 2; i < weaponRateupBanner.size(); i++){
+						for(int j = 0; j < availablePool.size(); j++){
+							if(availablePool[j] == weaponRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
+						}
+					}
 				}
 			}
 			
 			rnd = rand() % availablePool.size();
 			
-			cout << "+ + + +     You got " << availablePool[rnd] << "!\n";
+			cout << "(  + + + +  )   You got " << availablePool[rnd] << "!\n";
 			fourStarInventory[availablePool[rnd]]++;
+			
 			break;
 		case 5:
-			availablePool = fiveStarCharacterPool;
+			if(bannerType == "character"){
+				availablePool = fiveStarCharacterPool;
 			
-			for(int j = 0; j < availablePool.size(); j++){
-				if(availablePool[j] == characterRateupBanner[0]) availablePool.erase(availablePool.begin() + j);
+				for(int j = 0; j < availablePool.size(); j++){
+					if(availablePool[j] == characterRateupBanner[0]) availablePool.erase(availablePool.begin() + j);
+				}
+			} else if(bannerType == "weapon"){
+				availablePool = fiveStarWeaponPool;
+				
+				for(int j = availablePool.size() - 1; j >= 0; j--){
+					if(availablePool[j] == weaponRateupBanner[0] || availablePool[j] == weaponRateupBanner[1]) availablePool.erase(availablePool.begin() + j);
+				}
 			}
 			
 			rnd = rand() % availablePool.size();
 			
-			cout << "+ + + + +   You got " << availablePool[rnd] << "!\n";
+			cout << "( + + + + + )   You got " << availablePool[rnd] << "!\n";
 			fiveStarInventory[availablePool[rnd]]++;
 			break;
 		default:
@@ -297,7 +336,7 @@ void wishResultSelect(int rarity){
 	int odds = rand() % 100;
 	int rnd = 0;
 	vector<string> availablePool;
-	
+	cout << odds;
 	if(bannerType == "character"){
 		switch(rarity){
 			case 3:
@@ -307,10 +346,10 @@ void wishResultSelect(int rarity){
 				if(fourStarGuarantee[bannerType] || odds >= 50){
 					fourStarGuarantee[bannerType] = false;
 					
-					int fourStarRateup = rand() % (characterRateupBanner.size() - 1);
+					int fourStarRateup = rand() % (weaponRateupBanner.size() - 1);
 					
-					cout << "+ + + +     You got " << characterRateupBanner[fourStarRateup + 1] << "!\n";
-					fourStarInventory[characterRateupBanner[fourStarRateup + 1]]++;
+					cout << "(  + + + +  )   You got " << weaponRateupBanner[fourStarRateup + 1] << "!\n";
+					fourStarInventory[weaponRateupBanner[fourStarRateup + 1]]++;
 					
 					return;
 				}
@@ -325,7 +364,7 @@ void wishResultSelect(int rarity){
 				if(fiveStarGuarantee[bannerType] || odds >= 50){
 					fiveStarGuarantee[bannerType] = false;
 					
-					cout << "+ + + + +   You got " << characterRateupBanner[0] << "!\n";
+					cout << "( + + + + + )   You got " << characterRateupBanner[0] << "!\n";
 					fiveStarInventory[characterRateupBanner[0]]++;
 					
 					return;
@@ -340,20 +379,69 @@ void wishResultSelect(int rarity){
 			default:
 				break;
 		}
-	} else if(bannerType == "standard"){
+	} else if(bannerType == "weapon"){
 		switch(rarity){
 			case 3:
 				wishRandomizeLoss(rarity);
 				break;
 			case 4:
-				availablePool = fourStarPool;
+				if(fourStarGuarantee[bannerType] || odds >= 50){
+					fourStarGuarantee[bannerType] = false;
+					
+					int fourStarRateup = rand() % (weaponRateupBanner.size() - 2);
+					
+					cout << "(  + + + +  )   You got " << weaponRateupBanner[fourStarRateup + 2] << "!\n";
+					fourStarInventory[weaponRateupBanner[fourStarRateup + 2]]++;
+					
+					return;
+				}
+				
+				else {
+					fourStarGuarantee[bannerType] = true;
+					
+					wishRandomizeLoss(rarity);
+				}
+				break;
+			case 5:
+				if(fiveStarGuarantee[bannerType] || odds >= 75){
+					fiveStarGuarantee[bannerType] = false;
+					
+					odds = rand() % 100;
+					
+					if(odds >= 50){
+						cout << "( + + + + + )   You got " << weaponRateupBanner[0] << "!\n";
+						fiveStarInventory[weaponRateupBanner[0]]++;
+					} else {
+						cout << "( + + + + + )   You got " << weaponRateupBanner[1] << "!\n";						
+						fiveStarInventory[weaponRateupBanner[1]]++;
+					}
+					
+					return;
+				}
+				
+				else {
+					fiveStarGuarantee[bannerType] = true;
+					
+					wishRandomizeLoss(rarity);
+				}
+				break;
+			default:
+				break;
+			}
+		} else if(bannerType == "standard"){
+		switch(rarity){
+			case 3:
+				wishRandomizeLoss(rarity);
+				break;
+			case 4:
+				merge(fourStarCharacterPool.begin(), fourStarCharacterPool.end(), fourStarWeaponPool.begin(), fourStarWeaponPool.end(), availablePool.begin());
 				availablePool.push_back("Amber (4-Star)");
 				availablePool.push_back("Kaeya (4-Star)");
 				availablePool.push_back("Lisa (4-Star)");
 				
 				rnd = rand() % availablePool.size();
 			
-				cout << "+ + + +     You got " << availablePool[rnd] << "!\n";
+				cout << "(  + + + +  )   You got " << availablePool[rnd] << "!\n";
 				fourStarInventory[availablePool[rnd]]++;
 				break;
 			case 5:
@@ -363,7 +451,7 @@ void wishResultSelect(int rarity){
 				
 				rnd = rand() % availablePool.size();
 			
-				cout << "+ + + + +   You got " << availablePool[rnd] << "!\n";
+				cout << "( + + + + + )   You got " << availablePool[rnd] << "!\n";
 				fiveStarInventory[availablePool[rnd]]++;
 				break;
 			default:
