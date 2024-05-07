@@ -10,9 +10,7 @@
 #include <random>
 
 // todo
-// split weapon and character chances for 4* and 5*
-// fix weapon banner pity rates
-// add epitomized path for weapon and chronicle
+// add epitomized path for chronicle
 // save inventory
 // add the rest of banner options lol
 
@@ -43,8 +41,9 @@ vector<string> fourStarWeaponPool = {"Dragon's Bane (4-Star)", "Eye of Perceptio
 vector<string> fiveStarCharacterPool = {"Diluc (5-Star)", "Jean (5-Star)", "Keqing (5-Star)", "Mona (5-Star)", "Qiqi (5-Star)", 
 "Tighnari (5-Star)", "Dehya (5-Star)"};
 
-vector<string> fiveStarWeaponPool = {"Diluc (5-Star)", "Jean (5-Star)", "Keqing (5-Star)", "Mona (5-Star)", "Qiqi (5-Star)", 
-"Tighnari (5-Star)", "Dehya (5-Star)"};
+vector<string> fiveStarWeaponPool = {"Amos' Bow (5-Star)", "Aquila Favonia (5-Star)", "Lost Prayer to the Sacred Winds (5-Star)", 
+"Primodial Jade-Winged Spear (5-Star)", "Skyward Atlas (5-Star)", "Skyward Blade (5-Star)", "Skyward Harp (5-Star)", "Skyward Pride (5-Star)",
+"Skyward Spine (5-Star)", "Wolf's Gravestone (5-Star)"};
 
 unordered_map<string, int> fourStarPity;
 unordered_map<string, bool> fourStarGuarantee;
@@ -52,6 +51,14 @@ unordered_map<string, int> fourStarRate;
 unordered_map<string, int> fiveStarPity;
 unordered_map<string, bool> fiveStarGuarantee;
 unordered_map<string, int> fiveStarRate;
+
+unordered_map<string, int> fatePointCounter = {
+	{"weapon", -1}, {"chronicle", -1}
+};
+
+unordered_map<string, string> epitomizedPath = {
+	{"weapon", "-"}, {"chronicle", "-"}
+};
 
 unordered_map<string, int> fourStarInventory;
 unordered_map<string, int> fiveStarInventory;
@@ -256,6 +263,7 @@ void setup(){
 
 void wishRandomizeLoss(int rarity){
 	int rnd = 0;
+	int odds;
 	vector<string> availablePool;
 	
 	switch(rarity){
@@ -282,6 +290,10 @@ void wishRandomizeLoss(int rarity){
 							if(availablePool[j] == weaponRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
 						}
 					}
+				} else if(bannerType == "standard"){
+					availablePool.push_back("Amber (4-Star)");
+					availablePool.push_back("Kaeya (4-Star)");
+					availablePool.push_back("Lisa (4-Star)");
 				}
 			} else {
 				availablePool = fourStarWeaponPool;
@@ -320,6 +332,14 @@ void wishRandomizeLoss(int rarity){
 				for(int j = availablePool.size() - 1; j >= 0; j--){
 					if(availablePool[j] == weaponRateupBanner[0] || availablePool[j] == weaponRateupBanner[1]) availablePool.erase(availablePool.begin() + j);
 				}
+			} else if(bannerType == "standard"){
+				odds = rand() % 100;
+				
+				if(odds < 50){
+					availablePool = fiveStarCharacterPool;
+				} else {
+					availablePool = fiveStarWeaponPool;
+				}
 			}
 			
 			rnd = rand() % availablePool.size();
@@ -336,7 +356,7 @@ void wishResultSelect(int rarity){
 	int odds = rand() % 100;
 	int rnd = 0;
 	vector<string> availablePool;
-	cout << odds;
+	
 	if(bannerType == "character"){
 		switch(rarity){
 			case 3:
@@ -403,6 +423,15 @@ void wishResultSelect(int rarity){
 				}
 				break;
 			case 5:
+				if(fatePointCounter[bannerType] == 2){
+					cout << "( + + + + + )   You got " << epitomizedPath[bannerType] << "!\n";
+					fiveStarInventory[epitomizedPath[bannerType]]++;
+					fiveStarGuarantee[bannerType] = false;
+					fatePointCounter[bannerType] = 0;
+					
+					return;
+				}
+					
 				if(fiveStarGuarantee[bannerType] || odds >= 75){
 					fiveStarGuarantee[bannerType] = false;
 					
@@ -411,9 +440,21 @@ void wishResultSelect(int rarity){
 					if(odds >= 50){
 						cout << "( + + + + + )   You got " << weaponRateupBanner[0] << "!\n";
 						fiveStarInventory[weaponRateupBanner[0]]++;
+						
+						if(weaponRateupBanner[0] == epitomizedPath[bannerType]){
+							fatePointCounter[bannerType] = 0;
+						} else {
+							fatePointCounter[bannerType]++;
+						}
 					} else {
 						cout << "( + + + + + )   You got " << weaponRateupBanner[1] << "!\n";						
 						fiveStarInventory[weaponRateupBanner[1]]++;
+						
+						if(weaponRateupBanner[1] == epitomizedPath[bannerType]){
+							fatePointCounter[bannerType] = 0;
+						} else {
+							fatePointCounter[bannerType]++;
+						}
 					}
 					
 					return;
@@ -421,6 +462,7 @@ void wishResultSelect(int rarity){
 				
 				else {
 					fiveStarGuarantee[bannerType] = true;
+					fatePointCounter[bannerType]++;
 					
 					wishRandomizeLoss(rarity);
 				}
@@ -428,63 +470,64 @@ void wishResultSelect(int rarity){
 			default:
 				break;
 			}
-		} else if(bannerType == "standard"){
-		switch(rarity){
-			case 3:
-				wishRandomizeLoss(rarity);
-				break;
-			case 4:
-				merge(fourStarCharacterPool.begin(), fourStarCharacterPool.end(), fourStarWeaponPool.begin(), fourStarWeaponPool.end(), availablePool.begin());
-				availablePool.push_back("Amber (4-Star)");
-				availablePool.push_back("Kaeya (4-Star)");
-				availablePool.push_back("Lisa (4-Star)");
-				
-				rnd = rand() % availablePool.size();
-			
-				cout << "(  + + + +  )   You got " << availablePool[rnd] << "!\n";
-				fourStarInventory[availablePool[rnd]]++;
-				break;
-			case 5:
-				availablePool.resize(fiveStarCharacterPool.size() + fiveStarWeaponPool.size());
-				
-				merge(fiveStarCharacterPool.begin(), fiveStarCharacterPool.end(), fiveStarWeaponPool.begin(), fiveStarWeaponPool.end(), availablePool.begin());
-				
-				rnd = rand() % availablePool.size();
-			
-				cout << "( + + + + + )   You got " << availablePool[rnd] << "!\n";
-				fiveStarInventory[availablePool[rnd]]++;
-				break;
-			default:
-				break;
-		}
+	} else if(bannerType == "standard"){
+		wishRandomizeLoss(rarity);
 	}
 }
 
 void wishRaritySelect(){
-	if(fourStarPity[bannerType] == 9) fourStarRate[bannerType] += 943;
-	if(fiveStarPity[bannerType] >= 74) fiveStarRate[bannerType] += 60;
-	
-	int rarity = rand() % 1000;
-	
-	if(rarity < fiveStarRate[bannerType]){
-		fiveStarRate[bannerType] = 6;
-		fiveStarPity[bannerType] = 0;
+	if(bannerType != "weapon"){
+		if(fourStarPity[bannerType] >= 8) fourStarRate[bannerType] += 510;
+		if(fiveStarPity[bannerType] >= 74) fiveStarRate[bannerType] += 60;
 		
-		fourStarPity[bannerType]++;
+		int rarity = rand() % 1000;
 		
-		wishResultSelect(5);
-	} else if(rarity < fiveStarRate[bannerType] + fourStarRate[bannerType]){
-		fourStarRate[bannerType] = 51;
-		fourStarPity[bannerType] = 0;
-		
-		fiveStarPity[bannerType]++;
-		
-		wishResultSelect(4);
+		if(rarity < fiveStarRate[bannerType]){
+			fiveStarRate[bannerType] = 6;
+			fiveStarPity[bannerType] = 0;
+			
+			fourStarPity[bannerType]++;
+			
+			wishResultSelect(5);
+		} else if(rarity < fiveStarRate[bannerType] + fourStarRate[bannerType]){
+			fourStarRate[bannerType] = 51;
+			fourStarPity[bannerType] = 0;
+			
+			fiveStarPity[bannerType]++;
+			
+			wishResultSelect(4);
+		} else {
+			fourStarPity[bannerType]++;
+			fiveStarPity[bannerType]++;
+			
+			wishResultSelect(3);
+		}
 	} else {
-		fourStarPity[bannerType]++;
-		fiveStarPity[bannerType]++;
+		if(fourStarPity[bannerType] >= 8) fourStarRate[bannerType] += 600;
+		if(fiveStarPity[bannerType] >= 63) fiveStarRate[bannerType] += 70;
 		
-		wishResultSelect(3);
+		int rarity = rand() % 1000;
+		
+		if(rarity < fiveStarRate[bannerType]){
+			fiveStarRate[bannerType] = 7;
+			fiveStarPity[bannerType] = 0;
+			
+			fourStarPity[bannerType]++;
+			
+			wishResultSelect(5);
+		} else if(rarity < fiveStarRate[bannerType] + fourStarRate[bannerType]){
+			fourStarRate[bannerType] = 60;
+			fourStarPity[bannerType] = 0;
+			
+			fiveStarPity[bannerType]++;
+			
+			wishResultSelect(4);
+		} else {
+			fourStarPity[bannerType]++;
+			fiveStarPity[bannerType]++;
+			
+			wishResultSelect(3);
+		}
 	}
 }
 
@@ -612,6 +655,9 @@ void changeBannerType(){
 						weaponBannerKeyword = chosenBanner;
 						weaponRateupBanner = bannerItems;
 						
+						epitomizedPath[bannerType] = "-";
+						fatePointCounter[bannerType] = -1;
+						
 						cout << "Banner selected.\n";
 						break;
 					} else {
@@ -641,17 +687,33 @@ int main(){
 	while(true){
 		cout << "4-star pity: " << fourStarPity[bannerType];
 		if(fourStarGuarantee[bannerType]) cout << " ( + )";
+		
 		cout << "\n5-star pity: " << fiveStarPity[bannerType];
-		if(fiveStarGuarantee[bannerType]) cout << " ( + )";
+		if(fatePointCounter[bannerType] == 2) cout << " ( ! )";
+		else if(fiveStarGuarantee[bannerType]) cout << " ( + )";
+		
+		if(bannerType == "weapon" || bannerType == "chronicle"){
+			if(epitomizedPath[bannerType] != "-") cout << "\nCurrent Path: " << epitomizedPath[bannerType] << " | ";
+			if(fatePointCounter[bannerType] != -1) cout << "Fate Points [" << fatePointCounter[bannerType] << "/2]";
+		}
 		cout << "\n\n";
 		
 		cout << "1. Do 1 Pull\n";
 		cout << "2. Do 10 Pulls\n";
 		cout << "3. View inventory\n";
 		cout << "4. Change banner type\n";
+		if(bannerType == "weapon" || bannerType == "chronicle"){
+			cout << "5. Set Epitomized Path\n";
+		}
 		cout << ">> ";
 		
 		cin >> input;
+		
+		puts("");
+		puts("");
+		puts("");
+		puts("");
+		puts("");
 		
 		switch(input){
 			case 1:
@@ -665,6 +727,34 @@ int main(){
 				break;
 			case 4:
 				changeBannerType();
+				break;
+			case 5:
+				if(bannerType == "weapon" || bannerType == "chronicle"){
+					for(int i = 0; i < 2; i++){
+						cout << i+1 << ". " << weaponRateupBanner[i] << "\n";
+					}
+					
+					puts("");
+					
+					cout << "Please choose the weapon you would like to set your path on.\n";
+					
+					while(true){
+						cout << ">> ";
+						cin >> input;
+						
+						if(input == 1){
+							epitomizedPath[bannerType] = weaponRateupBanner[0];
+							break;
+						} else if(input == 2){
+							epitomizedPath[bannerType] = weaponRateupBanner[1];
+							break;						
+						}
+						
+						puts("");
+						cout << "Please choose a valid option.\n";
+					}
+					fatePointCounter[bannerType] = 0;
+				}
 				break;
 			default:
 				break;	
