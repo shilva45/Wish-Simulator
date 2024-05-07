@@ -366,10 +366,10 @@ void wishResultSelect(int rarity){
 				if(fourStarGuarantee[bannerType] || odds >= 50){
 					fourStarGuarantee[bannerType] = false;
 					
-					int fourStarRateup = rand() % (weaponRateupBanner.size() - 1);
+					int fourStarRateup = rand() % (characterRateupBanner.size() - 1);
 					
-					cout << "(  + + + +  )   You got " << weaponRateupBanner[fourStarRateup + 1] << "!\n";
-					fourStarInventory[weaponRateupBanner[fourStarRateup + 1]]++;
+					cout << "(  + + + +  )   You got " << characterRateupBanner[fourStarRateup + 1] << "!\n";
+					fourStarInventory[characterRateupBanner[fourStarRateup + 1]]++;
 					
 					return;
 				}
