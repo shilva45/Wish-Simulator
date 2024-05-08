@@ -12,7 +12,6 @@
 // todo
 // add epitomized path for chronicle
 // save inventory
-// add the rest of banner options lol
 
 using namespace std;
 
@@ -263,8 +262,8 @@ void setup(){
 
 void wishRandomizeLoss(int rarity){
 	int rnd = 0;
-	int odds;
 	vector<string> availablePool;
+	int odds;
 	
 	switch(rarity){
 		case 3:
@@ -294,6 +293,17 @@ void wishRandomizeLoss(int rarity){
 					availablePool.push_back("Amber (4-Star)");
 					availablePool.push_back("Kaeya (4-Star)");
 					availablePool.push_back("Lisa (4-Star)");
+				} else if(bannerType == "chronicle"){
+					availablePool.clear();
+					availablePool = characterRateupBanner;
+					
+					for(int i = availablePool.size() - 1; i >= 0; i--){
+						size_t found = availablePool[i].find("5-Star");
+					
+						if(found != string::npos){
+							availablePool.erase(availablePool.begin() + i);
+						}
+					}
 				}
 			} else {
 				availablePool = fourStarWeaponPool;
@@ -308,6 +318,17 @@ void wishRandomizeLoss(int rarity){
 					for(int i = 2; i < weaponRateupBanner.size(); i++){
 						for(int j = 0; j < availablePool.size(); j++){
 							if(availablePool[j] == weaponRateupBanner[i]) availablePool.erase(availablePool.begin() + j);
+						}
+					}
+				} else if(bannerType == "chronicle"){
+					availablePool.clear();
+					availablePool = weaponRateupBanner;
+					
+					for(int i = availablePool.size() - 1; i >= 0; i--){
+						size_t found = availablePool[i].find("5-Star");
+					
+						if(found != string::npos){
+							availablePool.erase(availablePool.begin() + i);
 						}
 					}
 				}
@@ -336,9 +357,37 @@ void wishRandomizeLoss(int rarity){
 				odds = rand() % 100;
 				
 				if(odds < 50){
+					availablePool.clear();
 					availablePool = fiveStarCharacterPool;
 				} else {
+					availablePool.clear();
 					availablePool = fiveStarWeaponPool;
+				}
+			} else if(bannerType == "chronicle"){
+				odds = rand() % 100;
+				
+				if(odds < 50){
+					availablePool.clear();
+					availablePool = characterRateupBanner;
+					
+					for(int i = availablePool.size() - 1; i >= 0; i--){
+						size_t found = availablePool[i].find("4-Star");
+					
+						if(found != string::npos){
+							availablePool.erase(availablePool.begin() + i);
+						}
+					}
+				} else {
+					availablePool.clear();
+					availablePool = weaponRateupBanner;
+					
+					for(int i = availablePool.size() - 1; i >= 0; i--){
+						size_t found = availablePool[i].find("4-Star");
+					
+						if(found != string::npos){
+							availablePool.erase(availablePool.begin() + i);
+						}
+					}
 				}
 			}
 			
@@ -470,7 +519,7 @@ void wishResultSelect(int rarity){
 			default:
 				break;
 			}
-	} else if(bannerType == "standard"){
+	} else if(bannerType == "standard" || bannerType == "chronicle"){
 		wishRandomizeLoss(rarity);
 	}
 }
@@ -670,6 +719,101 @@ void changeBannerType(){
 		case 3:
 			bannerType = "standard";
 			break;
+		case 4:
+			bannerType = "chronicle";
+			
+			cout << "\nPlease select the chronicled banner you would wish to access.\n";
+			cout << "1. Mondstadt\n";
+			cout << "2. Liyue\n";
+			cout << "3. Inazuma\n";
+			cout << "4. Sumeru\n";
+			cout << "5. Fontaine";
+			
+			while(true){
+				cout << "\n>> ";
+				cin >> bannerInput;
+				
+				if(bannerInput == "1"){
+					characterRateupBanner = {"Albedo (5-Star)", "Diluc (5-Star)", "Eula (5-Star)", "Jean (5-Star)", "Klee (5-Star)", "Mona (5-Star)", 
+					"Venti (5-Star)", 
+					
+					"Amber (4-Star)", "Barbara (4-Star)", "Bennett (4-Star)", "Fischl (4-Star)", "Kaeya (4-Star)", 
+					"Lisa (4-Star)", "Noelle (4-Star)", "Razor (4-Star)", "Sucrose (4-Star)", "Diona (4-Star)", "Rosaria (4-Star)", "Mika (4-Star)"};
+					characterBannerVersion = "mondstadt";
+					
+					weaponRateupBanner = {"Aquila Favonia (5-Star)", "Elegy for the End (5-Star)", "Freedom-Sworn (5-Star)", 
+					"Lost Prayer to the Sacred Winds (5-Star)", "Skyward Atlas (5-Star)", "Skyward Blade (5-Star)", "Skyward Harp (5-Star)", 
+					"Skyward Pride (5-Star)", "Skyward Spine (5-Star)", "Song of Broken Pines (5-Star)", "Wolf's Gravestone (5-Star)", 
+					
+					"The Alley Flash (4-Star)", "Lion's Roar (4-Star)", "Sacrificial Sword (4-Star)", 
+					"The Flute (4-Star)", "Favonius Sword (4-Star)", "Rainslasher (4-Star)", "Sacrificial Greatsword (4-Star)", "The Bell (4-Star)", 
+					"Favonius Greatsword (4-Star)", "Favonius Lance (4-Star)", "Dragon's Bane (4-Star)", "Wine and Song (4-Star)", 
+					"Eye of Perception (4-Star)", "Sacrificial Fragments (4-Star)", "The Widsith (4-Star)", "Favonius Codex (4-Star)", 
+					"Mitternachts Waltz (4-Star)", "Alley Hunter (4-Star)", "Rust (4-Star)", "Sacrificial Bow (4-Star)", "The Stringless (4-Star)", 
+					"Favonius Warbow (4-Star)"};
+					weaponBannerKeyword = "mondstadt";
+				} else if(bannerInput == "2"){
+					characterRateupBanner = {"Baizhu (5-Star)", "Ganyu (5-Star)", "Hu Tao (5-Star)", "Keqing (5-Star)", "Qiqi (5-Star)", 
+					"Shenhe (5-Star)", "Xianyun (5-Star)", "Xiao (5-Star)", "Yelan (5-Star)", "Zhongli (5-Star)", 
+					
+					"Beidou (4-Star)", "Chongyun (4-Star)", "Gaming (4-Star)", "Ningguang (4-Star)", "Xiangling (4-Star)", "Xingqiu (4-Star)", 
+					"Xinyan (4-Star)", "Yanfei (4-Star)", "Yanfei (4-Star)", "Yaoyao (4-Star)", "Yun Jin (4-Star)"};
+					characterBannerVersion = "liyue";
+					
+					weaponRateupBanner = {"Amos' Bow (5-Star)", "Aqua Simulacra (5-Star)", "Calamity Queller (5-Star)", "Crane's Echoing Call (5-Star)", 
+					"Jadefall's Splendor (5-Star)", "Memory of Dust (5-Star)", "Primordial Jade Cutter (5-Star)", 
+					"Primordial Jade-Winged Spear (5-Star)", "Staff of Homa (5-Star)", "Summit Shaper (5-Star)", "The Unforged (5-Star)", 
+					"Vortex Vanquisher (5-Star)", 
+					
+					"Dragon's Bane (4-Star)", "Lion's Roar (4-Star)", "Lithic Blade (4-Star)", "Lithic Spear (4-Star)", "Rainslasher (4-Star)"};
+					weaponBannerKeyword = "liyue";
+				} else if(bannerInput == "3"){
+					characterRateupBanner = {"Arataki Itto (5-Star)", "Chiori (5-Star)", "Kaedehara Kazuha (5-Star)", "Kamisato Ayaka (5-Star)", 
+					"Kamisato Ayato (5-Star)", "Raiden Shogun (5-Star)", "Sangonomiya Kokomi (5-Star)", "Yae Miko (5-Star)", "Yoimiya (5-Star)", 
+					
+					"Gorou (4-Star)", "Kirara (4-Star)", "Kujou Sara (4-Star)", "Kuki Shinobu (4-Star)", "Sayu (4-Star)", 
+					"Shikanoin Heizou (4-Star)", "Thoma (4-Star)"};
+					characterBannerVersion = "inazuma";
+					
+					weaponRateupBanner = {"Engulfing Lightning (5-Star)", "Everlasting Moonglow (5-Star)", "Haran Geppaku Futsu (5-Star)", 
+					"Kagura's Verity (5-Star)", "Mistsplitter Reforged (5-Star)", "Redhorn Stonethresher (5-Star)", "Thundering Pulse (5-Star)", 
+					"Uraku Misagiri (5-Star)", 
+					
+					"Akuoumaru (4-Star)", "Mouun's Moon (4-Star)", "Wavebreaker's Fin (4-Star)"};
+					weaponBannerKeyword = "inazuma";
+				} else if(bannerInput == "4"){
+					characterRateupBanner = {"Alhaitham (5-Star)", "Cyno (5-Star)", "Dehya (5-Star)", "Nahida (5-Star)", "Nilou (5-Star)", 
+					"Tighnari (5-Star)", "Wanderer (5-Star)",  
+					
+					"Candace (4-Star)", "Collei (4-Star)", "Dori (4-Star)", "Faruzan (4-Star)", "Kaveh (4-Star)", "Layla (4-Star)"};
+					characterBannerVersion = "sumeru";
+					
+					weaponRateupBanner = {"A Thousand Floating Dreams (5-Star)", "Beacon of the Reed Sea (5-Star)", "Hunter's Path (5-Star)", 
+					"Key of Khaj-Nisut (5-Star)", "Light of Foliar Incision (5-Star)", "Staff of the Scarlet Sands (5-Star)", 
+					"Tulaytullah's Remembrance (5-Star)", 
+					
+					"Makhaira Aquamarine (4-Star)", "Wandering Evenstar (4-Star)", "Xiphos' Moonlight (4-Star)"};
+					weaponBannerKeyword = "sumeru";
+				} else if(bannerInput == "5"){
+					characterRateupBanner = {"Furina (5-Star)", "Lyney (5-Star)", "Navia (5-Star)", "Neuvillette (5-Star)", "Wriothesley (5-Star)", 
+					
+					"Charlotte (4-Star)", "Chevreuse (4-Star)", "Freminet (4-Star)", "Lynette (4-Star)"};
+					characterBannerVersion = "fontaine";
+					
+					weaponRateupBanner = {"A Thousand Floating Dreams (5-Star)", "Beacon of the Reed Sea (5-Star)", "Hunter's Path (5-Star)", 
+					"Key of Khaj-Nisut (5-Star)", "Light of Foliar Incision (5-Star)", "Staff of the Scarlet Sands (5-Star)", 
+					"Tulaytullah's Remembrance (5-Star)", 
+					
+					"Portable Power Saw (4-Star)", "Prospector's Drill (4-Star)", "Range Gauge (4-Star)"};
+					weaponBannerKeyword = "fontaine";
+				} else {
+					cout << "Invalid banner. Please enter a valid banner.";
+					continue;
+				}
+					
+				break;
+			}
+			break;
 		default:
 			cout << "Cancelled menu.\n";
 			return;
@@ -693,9 +837,9 @@ int main(){
 		else if(fiveStarGuarantee[bannerType]) cout << " ( + )";
 		
 		if(bannerType == "weapon" || bannerType == "chronicle"){
-			if(epitomizedPath[bannerType] != "-") cout << "\nCurrent Path: " << epitomizedPath[bannerType] << " | ";
-			if(fatePointCounter[bannerType] != -1) cout << "Fate Points [" << fatePointCounter[bannerType] << "/2]";
+			if(epitomizedPath[bannerType] != "-") cout << "\nCurrent Path: " << epitomizedPath[bannerType] << " | Fate Points [" << fatePointCounter[bannerType] << "/2]";
 		}
+		
 		cout << "\n\n";
 		
 		cout << "1. Do 1 Pull\n";
