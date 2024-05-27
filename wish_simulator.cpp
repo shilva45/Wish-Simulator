@@ -10,7 +10,6 @@
 #include <random>
 
 // todo
-// add epitomized path for chronicle
 // save inventory
 
 using namespace std;
@@ -52,6 +51,8 @@ unordered_map<string, bool> fiveStarGuarantee;
 unordered_map<string, int> fiveStarRate;
 
 vector<int> standardBannerGuarantee = {0, 0, 0, 0}; // 5* character, 5* weapon, 4* character, 4* weapon
+vector<string> chronicledRateUpBanner;
+bool chronicledCharacterFocus = false;
 
 unordered_map<string, int> fatePointCounter = {
 	{"weapon", -1}, {"chronicle", -1}
@@ -389,29 +390,39 @@ void wishRandomizeLoss(int rarity){
 					standardBannerGuarantee[1] = 0;
 				}
 			} else if(bannerType == "chronicle"){
-				odds = rand() % 100;
-				
-				if(odds < 50){
+				if(chronicledCharacterFocus){
 					availablePool.clear();
 					availablePool = characterRateupBanner;
 					
-					for(int i = availablePool.size() - 1; i >= 0; i--){
-						size_t found = availablePool[i].find("4-Star");
-					
-						if(found != string::npos){
+					for(int i = 0; i < availablePool.size(); i++){
+						if(availablePool[i] == epitomizedPath[bannerType]){
 							availablePool.erase(availablePool.begin() + i);
+							break;
 						}
 					}
 				} else {
 					availablePool.clear();
 					availablePool = weaponRateupBanner;
 					
-					for(int i = availablePool.size() - 1; i >= 0; i--){
-						size_t found = availablePool[i].find("4-Star");
-					
-						if(found != string::npos){
+					for(int i = 0; i < availablePool.size(); i++){
+						if(availablePool[i] == epitomizedPath[bannerType]){
 							availablePool.erase(availablePool.begin() + i);
+							break;
 						}
+					}
+				}
+
+				if(fatePointCounter[bannerType] == -1){
+					availablePool.clear();
+					availablePool.resize(characterRateupBanner.size() + weaponRateupBanner.size());
+					merge(characterRateupBanner.begin(), characterRateupBanner.end(), weaponRateupBanner.begin(), weaponRateupBanner.end(), availablePool.begin());
+				}
+
+				for(int i = availablePool.size() - 1; i >= 0; i--){
+					size_t found = availablePool[i].find("4-Star");
+				
+					if(found != string::npos){
+						availablePool.erase(availablePool.begin() + i);
 					}
 				}
 			}
@@ -552,7 +563,49 @@ void wishResultSelect(int rarity){
 
 		wishRandomizeLoss(rarity);
 	} else if(bannerType == "chronicle"){
-		wishRandomizeLoss(rarity);
+		vector<string> fiveStarRateUp;
+		vector<string> fourStarRateUp;
+
+		for(string& s : characterRateupBanner){
+			size_t found = s.find("4-Star");
+
+			if(found != string::npos) fourStarRateUp.push_back(s);
+			else fiveStarRateUp.push_back(s);
+		}
+		
+		for(string& s : weaponRateupBanner){
+			size_t found = s.find("4-Star");
+
+			if(found != string::npos) fourStarRateUp.push_back(s);
+			else fiveStarRateUp.push_back(s);
+		}
+
+		switch(rarity){
+			case 3:
+				wishRandomizeLoss(rarity);
+				break;
+			case 4:
+				wishRandomizeLoss(rarity);
+				break;
+			case 5:
+				if(fatePointCounter[bannerType] == 1){
+					cout << "( + + + + + )   You got " << epitomizedPath[bannerType] << "!\n";
+					fiveStarInventory[epitomizedPath[bannerType]]++;
+					fiveStarGuarantee[bannerType] = false;
+					fatePointCounter[bannerType] = 0;
+					
+					return;
+				}
+				
+				else {
+					if(fatePointCounter[bannerType] != -1) fatePointCounter[bannerType]++;
+					
+					wishRandomizeLoss(rarity);
+				}
+				break;
+			default:
+				break;
+			}
 	}
 }
 
@@ -865,11 +918,13 @@ int main(){
 		if(fourStarGuarantee[bannerType]) cout << " ( + )";
 		
 		cout << "\n5-star pity: " << fiveStarPity[bannerType];
-		if(fatePointCounter[bannerType] == 2) cout << " ( ! )";
+		if(fatePointCounter[bannerType] == 2 || (bannerType == "chronicle" && fatePointCounter[bannerType] == 1)) cout << " ( ! )";
 		else if(fiveStarGuarantee[bannerType]) cout << " ( + )";
 		
-		if(bannerType == "weapon" || bannerType == "chronicle"){
+		if(bannerType == "weapon"){
 			if(epitomizedPath[bannerType] != "-") cout << "\nCurrent Path: " << epitomizedPath[bannerType] << " | Fate Points [" << fatePointCounter[bannerType] << "/2]";
+		} else if(bannerType == "chronicle"){
+			if(epitomizedPath[bannerType] != "-") cout << "\nCurrent Path: " << epitomizedPath[bannerType] << " | Fate Points [" << fatePointCounter[bannerType] << "/1]";
 		}
 		cout << "\n\n";
 		
@@ -904,7 +959,7 @@ int main(){
 				changeBannerType();
 				break;
 			case 5:
-				if(bannerType == "weapon" || bannerType == "chronicle"){
+				if(bannerType == "weapon"){
 					for(int i = 0; i < 2; i++){
 						cout << i+1 << ". " << weaponRateupBanner[i] << "\n";
 					}
@@ -929,6 +984,61 @@ int main(){
 						cout << "Please choose a valid option.\n";
 					}
 					fatePointCounter[bannerType] = 0;
+				} else if(bannerType == "chronicle"){
+					chronicledRateUpBanner.clear();
+					
+					// add 5 stars, no 4 stars
+					for(string& s : characterRateupBanner){
+						size_t found = s.find("4-Star");
+
+						if(found != string::npos){
+							break;
+						}
+						chronicledRateUpBanner.push_back(s);
+					}
+
+					for(string& s : weaponRateupBanner){
+						size_t found = s.find("4-Star");
+
+						if(found != string::npos){
+							break;
+						}
+						chronicledRateUpBanner.push_back(s);
+					}
+
+					for(int i = 0; i < chronicledRateUpBanner.size(); i++){
+						cout << i+1 << ". " << chronicledRateUpBanner[i] << "\n";
+					}
+					
+					puts("");
+					
+					cout << "Please choose the item you would like to set your path on.\n";
+					
+					while(true){
+						cout << ">> ";
+						cin >> input;
+
+						if(input >= 1 && input <= chronicledRateUpBanner.size()){
+							epitomizedPath[bannerType] = chronicledRateUpBanner[input-1];
+							break;
+						}
+						
+						puts("");
+						cout << "Please choose a valid option.\n";
+					}
+					fatePointCounter[bannerType] = 0;
+					
+					bool isChar = false;
+
+					for(string& s : characterRateupBanner){
+						if(s == epitomizedPath[bannerType]){
+							isChar = true;
+							break;
+						}
+					}
+
+					if(isChar) chronicledCharacterFocus = true;
+					else chronicledCharacterFocus = false;
 				}
 				break;
 			default:
