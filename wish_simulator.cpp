@@ -9,10 +9,9 @@
 #include <cstdlib>
 #include <random>
 
-// todo
-// save inventory
-
 using namespace std;
+
+int totalPulls = 0;
 
 string bannerType = "weapon";
 string characterBannerVersion = "arlecchino-1";
@@ -249,17 +248,53 @@ void setup(){
 	}
 	
 	string filename = "pulls_inventory.txt";
-	ifstream Check;
+	ifstream inputFile;
+	string output;
 	
-	Check.open(filename);
+	inputFile.open(filename);
 	
-	if(!Check.is_open()){
+	if(!inputFile.is_open()){
 		ofstream File;
 		File.open(filename);
+		File << 0 << endl;
 		File.close();
-		cout << "File was created\n";
+		cout << "File was created.\n";
 	} else {
-		cout << "File exists\n";
+		cout << "File exists. Retrieving data...\n";
+		if(getline(inputFile, output)){
+			int retrievePulls = stoi(output);
+			totalPulls = retrievePulls;
+		}
+
+		cout << "Retrieved pulls successfully.\n";
+
+		while(getline(inputFile, output)){
+			string itemName;
+			string amtStr;
+			string s;
+
+			for(char& c : output){
+				if(c != '|'){
+					s += c;
+				} else {
+					itemName = s;
+					s = "";
+				}
+			}
+
+			amtStr = s;
+			int amtInt = stoi(amtStr);
+
+			if(itemName.find("5-Star") != string::npos){
+				fiveStarInventory[itemName] = amtInt;
+			} else {
+				fourStarInventory[itemName] = amtInt;
+			}
+		}
+
+		cout << "Retrieved inventory successfully.\n";
+
+		inputFile.close();
 	}
 }
 
@@ -610,6 +645,8 @@ void wishResultSelect(int rarity){
 }
 
 void wishRaritySelect(){
+	totalPulls++;
+
 	if(bannerType != "weapon"){
 		if(fourStarPity[bannerType] >= 8) fourStarRate[bannerType] += 510;
 		if(fiveStarPity[bannerType] >= 73) fiveStarRate[bannerType] += 60;
@@ -914,6 +951,8 @@ int main(){
 	int input = 0;
 	
 	while(true){
+		cout << "Total Pulls: " << totalPulls << "\n\n";
+
 		cout << "4-star pity: " << fourStarPity[bannerType];
 		if(fourStarGuarantee[bannerType]) cout << " ( + )";
 		
@@ -931,9 +970,11 @@ int main(){
 		cout << "1. Do 1 Pull\n";
 		cout << "2. Do 10 Pulls\n";
 		cout << "3. View inventory\n";
-		cout << "4. Change banner type\n";
+		cout << "4. Save data\n";
+		cout << "5. Reset data\n";
+		cout << "6. Change banner type\n";
 		if(bannerType == "weapon" || bannerType == "chronicle"){
-			cout << "5. Set Epitomized Path\n";
+			cout << "7. Set Epitomized Path\n";
 		}
 		cout << ">> ";
 		
@@ -944,105 +985,149 @@ int main(){
 		puts("");
 		puts("");
 		puts("");
-		
-		switch(input){
-			case 1:
-				wishRaritySelect();
-				break;
-			case 2:
-				for(int i = 0; i < 10; i++) wishRaritySelect();
-				break;
-			case 3:
-				checkInventory();
-				break;
-			case 4:
-				changeBannerType();
-				break;
-			case 5:
-				if(bannerType == "weapon"){
-					for(int i = 0; i < 2; i++){
-						cout << i+1 << ". " << weaponRateupBanner[i] << "\n";
-					}
-					
-					puts("");
-					
-					cout << "Please choose the weapon you would like to set your path on.\n";
-					
-					while(true){
-						cout << ">> ";
-						cin >> input;
-						
-						if(input == 1){
-							epitomizedPath[bannerType] = weaponRateupBanner[0];
-							break;
-						} else if(input == 2){
-							epitomizedPath[bannerType] = weaponRateupBanner[1];
-							break;						
-						}
-						
-						puts("");
-						cout << "Please choose a valid option.\n";
-					}
-					fatePointCounter[bannerType] = 0;
-				} else if(bannerType == "chronicle"){
-					chronicledRateUpBanner.clear();
-					
-					// add 5 stars, no 4 stars
-					for(string& s : characterRateupBanner){
-						size_t found = s.find("4-Star");
 
-						if(found != string::npos){
-							break;
-						}
-						chronicledRateUpBanner.push_back(s);
-					}
+		if(input == 1){
+			wishRaritySelect();
+		} else if(input == 2){
+			for(int i = 0; i < 10; i++) wishRaritySelect();
+		} else if(input == 3){
+			checkInventory();
+		} else if(input == 4){
+			ofstream inputFile("pulls_inventory.txt");
+			inputFile << totalPulls << endl;
 
-					for(string& s : weaponRateupBanner){
-						size_t found = s.find("4-Star");
+			for(auto& i : fiveStarInventory){
+				inputFile << i.first << "|" << i.second << endl;
+			}
 
-						if(found != string::npos){
-							break;
-						}
-						chronicledRateUpBanner.push_back(s);
-					}
+			for(auto& i : fourStarInventory){
+				inputFile << i.first << "|" << i.second << endl;
+			}
 
-					for(int i = 0; i < chronicledRateUpBanner.size(); i++){
-						cout << i+1 << ". " << chronicledRateUpBanner[i] << "\n";
-					}
-					
-					puts("");
-					
-					cout << "Please choose the item you would like to set your path on.\n";
-					
-					while(true){
-						cout << ">> ";
-						cin >> input;
+			inputFile.close();
+			cout << "Data saved successfully.\n";
+		} else if(input == 5){
+			cout << "Are you sure you want to delete you data? All of your history will be lost. [yes/no]\n>> ";
+			string choice;
+			cin >> choice;
 
-						if(input >= 1 && input <= chronicledRateUpBanner.size()){
-							epitomizedPath[bannerType] = chronicledRateUpBanner[input-1];
-							break;
-						}
-						
-						puts("");
-						cout << "Please choose a valid option.\n";
-					}
-					fatePointCounter[bannerType] = 0;
-					
-					bool isChar = false;
+			if(choice != "yes") continue;
 
-					for(string& s : characterRateupBanner){
-						if(s == epitomizedPath[bannerType]){
-							isChar = true;
-							break;
-						}
-					}
+			ofstream inputFile("pulls_inventory.txt");
+			inputFile << 0 << endl;
 
-					if(isChar) chronicledCharacterFocus = true;
-					else chronicledCharacterFocus = false;
+			inputFile.close();
+
+			totalPulls = 0;
+			fiveStarInventory.clear();
+
+			fourStarPity.clear();
+			fourStarGuarantee.clear();
+			fourStarRate.clear();
+			fiveStarPity.clear();
+			fiveStarGuarantee.clear();
+			fiveStarRate.clear();
+
+			standardBannerGuarantee = {0, 0, 0, 0}; // 5* character, 5* weapon, 4* character, 4* weapon
+			chronicledRateUpBanner.clear();
+			chronicledCharacterFocus = false;
+
+			fatePointCounter = {
+				{"weapon", -1}, {"chronicle", -1}
+			};
+
+			epitomizedPath = {
+				{"weapon", "-"}, {"chronicle", "-"}
+			};
+
+			fourStarInventory.clear();
+			fiveStarInventory.clear();
+
+			cout << "Data cleared successfully.\n";
+		} else if(input == 6){
+			changeBannerType();
+		} else if(input == 7){
+			if(bannerType == "weapon"){
+				for(int i = 0; i < 2; i++){
+					cout << i+1 << ". " << weaponRateupBanner[i] << "\n";
 				}
-				break;
-			default:
-				break;	
+				
+				puts("");
+				
+				cout << "Please choose the weapon you would like to set your path on.\n";
+				
+				while(true){
+					cout << ">> ";
+					cin >> input;
+					
+					if(input == 1){
+						epitomizedPath[bannerType] = weaponRateupBanner[0];
+						break;
+					} else if(input == 2){
+						epitomizedPath[bannerType] = weaponRateupBanner[1];
+						break;						
+					}
+					
+					puts("");
+					cout << "Please choose a valid option.\n";
+				}
+				fatePointCounter[bannerType] = 0;
+			} else if(bannerType == "chronicle"){
+				chronicledRateUpBanner.clear();
+				
+				// add 5 stars, no 4 stars
+				for(string& s : characterRateupBanner){
+					size_t found = s.find("4-Star");
+
+					if(found != string::npos){
+						break;
+					}
+					chronicledRateUpBanner.push_back(s);
+				}
+
+				for(string& s : weaponRateupBanner){
+					size_t found = s.find("4-Star");
+
+					if(found != string::npos){
+						break;
+					}
+					chronicledRateUpBanner.push_back(s);
+				}
+
+				for(int i = 0; i < chronicledRateUpBanner.size(); i++){
+					cout << i+1 << ". " << chronicledRateUpBanner[i] << "\n";
+				}
+				
+				puts("");
+				
+				cout << "Please choose the item you would like to set your path on.\n";
+				
+				while(true){
+					cout << ">> ";
+					cin >> input;
+
+					if(input >= 1 && input <= chronicledRateUpBanner.size()){
+						epitomizedPath[bannerType] = chronicledRateUpBanner[input-1];
+						break;
+					}
+					
+					puts("");
+					cout << "Please choose a valid option.\n";
+				}
+				fatePointCounter[bannerType] = 0;
+				
+				bool isChar = false;
+
+				for(string& s : characterRateupBanner){
+					if(s == epitomizedPath[bannerType]){
+						isChar = true;
+						break;
+					}
+				}
+
+				if(isChar) chronicledCharacterFocus = true;
+				else chronicledCharacterFocus = false;
+			}
 		}
 		
 		puts("");
