@@ -1007,7 +1007,7 @@ int main(){
 			inputFile.close();
 			cout << "Data saved successfully.\n";
 		} else if(input == 5){
-			cout << "Are you sure you want to delete you data? All of your history will be lost. [yes/no]\n>> ";
+			cout << "Are you sure you want to delete your data? All of your history will be lost. [yes/no]\n>> ";
 			string choice;
 			cin >> choice;
 
