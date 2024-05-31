@@ -246,6 +246,9 @@ void setup(){
 		fiveStarGuarantee[s] = false;
 		fiveStarRate[s] = 6;
 	}
+
+	fourStarRate["weapon"] = 60;
+	fiveStarRate["weapon"] = 7;
 	
 	string filename = "pulls_inventory.txt";
 	ifstream inputFile;
